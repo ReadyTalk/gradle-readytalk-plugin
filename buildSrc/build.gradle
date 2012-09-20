@@ -1,0 +1,15 @@
+apply plugin: 'groovy'
+
+repositories {
+  mavenCentral()
+  maven { 
+  	url 'http://repo.jfrog.org/artifactory/gradle-plugins'
+  }
+}
+
+dependencies {
+  compile group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '2.0.16'
+  compile group: 'net.saliman', name: 'gradle-properties-plugin', version: '1.1.0'
+  compile gradleApi()
+  groovy localGroovy()
+}

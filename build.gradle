@@ -1,0 +1,13 @@
+apply from: 'buildSrc/build.gradle'
+apply plugin: 'readytalk-all'
+
+sourceSets {
+  main {
+    groovy {
+      srcDir file("buildSrc/src/main/groovy")
+    }
+    resources {
+      srcDir file("buildSrc/src/main/resources")
+    }
+  }
+}
