@@ -10,11 +10,6 @@ class InstallTask extends DefaultTask {
 
   @TaskAction
   void run() {
-    project.uploadArchives {
-      repositories {
-        add project.buildscript.repositories.getByName('ecovate_init_local')
-      }
-    }
     project.uploadArchives.execute()
   }
 
