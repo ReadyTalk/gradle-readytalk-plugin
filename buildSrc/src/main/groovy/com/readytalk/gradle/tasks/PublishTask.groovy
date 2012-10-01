@@ -6,16 +6,11 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.OutputDirectory;
 
-class InstallTask extends DefaultTask {
+class PublishTask extends DefaultTask {
 
   @TaskAction
   void run() {
-
-  	def localRepo = project.uploadArchives.repositories.getByName('readytalk_local')
-  	project.uploadArchives.repositories.clear()
-  	project.uploadArchives.repositories.add(localRepo)
-
+    project.uploadArchives.repositories.remove(project.uploadArchives.repositories.findByName('readytalk_local'))
     project.uploadArchives.execute()
   }
-
 }

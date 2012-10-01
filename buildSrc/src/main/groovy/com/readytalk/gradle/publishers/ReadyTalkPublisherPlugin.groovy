@@ -1,11 +1,13 @@
-package com.readytalk.gradle
+package com.readytalk.gradle.publishers
 
 import com.readytalk.gradle.tasks.InstallTask
-import com.readytalk.gradle.util.PluginApplicator
+import org.gradle.api.Project
+import org.gradle.api.Plugin
+import org.gradle.api.Task
 
 import org.gradle.api.DefaultTask
 
-class ReadyTalkPublisherPlugin extends PluginApplicator implements ReadyTalkPublishConvention {
+class ReadyTalkPublisherPlugin extends LocalPublisherPlugin implements PublisherConvention {
 
   void apply(Project project) {
     super.apply(project)
@@ -14,15 +16,7 @@ class ReadyTalkPublisherPlugin extends PluginApplicator implements ReadyTalkPubl
       plugin 'artifactory'
     }
 
-    addInstallTask(InstallTask.class)
     addPublishTask(DefaultTask.class)
-  }
-
-  void addInstallTask(Class<Task> task) {
-  	InstallTask install = project.tasks.add('install', task)
-  	install.setDescription 'Install project into the local Ivy repository'
-  	install.setGroup 'publish'
-    install.dependsOn 'build'
   }
 
   void addPublishTask(Class<Task> task) {

@@ -1,37 +1,23 @@
-package com.readytalk.gradle
+package com.readytalk.gradle.publishers
 
-import com.readytalk.gradle.tasks.InstallTask
-import com.readytalk.gradle.util.PluginApplicator
-
+import com.readytalk.gradle.tasks.PublishTask
+import org.gradle.api.Project
+import org.gradle.api.Plugin
 import org.gradle.api.DefaultTask
+import org.gradle.api.Task
 
-class OpenSourcePublisherPlugin extends PluginApplicator implements ReadyTalkPublishConvention {
+class OpenSourcePublisherPlugin extends LocalPublisherPlugin implements PublisherConvention {
 
   void apply(Project project) {
     super.apply(project)
 
-    project.apply {
-      plugin 'artifactory'
-    }
-
-    addInstallTask(InstallTask.class)
-    addPublishTask(DefaultTask.class)
-  }
-
-  void addInstallTask(Class<Task> task) {
-  	InstallTask install = project.tasks.add('install', task)
-  	install.setDescription 'Install project into the local Ivy repository'
-  	install.setGroup 'publish'
-    install.dependsOn 'build'
+    addPublishTask(PublishTask.class)
   }
 
   void addPublishTask(Class<Task> task) {
-    // The artifactoryPublish looks for itself in the task graph,
-    // so we have to define it like this
-    DefaultTask publish = project.tasks.add('publish', task)
-    publish.setDescription 'Install project into corporate Artifactory'
+    PublishTask publish = project.tasks.add('publish', task)
+    publish.setDescription 'Install project into "Maven Central"'
     publish.setGroup 'publish'
-    publish.dependsOn 'artifactoryPublish'
   }
 
 }

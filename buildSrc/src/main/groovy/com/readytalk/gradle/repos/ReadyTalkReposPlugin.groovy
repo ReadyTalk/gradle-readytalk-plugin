@@ -1,9 +1,11 @@
 package com.readytalk.gradle.repos
 
-import com.readytalk.gradle.util.PluginApplicator
+import org.gradle.api.Project
+import org.gradle.api.Plugin
 
-class ReadyTalkReposPlugin extends PluginApplicator implements ReposConvention {
+class ReadyTalkReposPlugin implements ReposConvention {
 
+  Project project
   static String ivyMainResolverName = 'readytalk_ivy_main'
   static String mavenMainResolverName = 'readytalk_maven_main'
   static String snapshotPublishRepoName = 'readytalk_snapshot_publish'
@@ -14,7 +16,7 @@ class ReadyTalkReposPlugin extends PluginApplicator implements ReposConvention {
   String repoType
 
   void apply(Project project) {
-    super.apply(project)
+    this.project = project
 
     checkRequiredProjectVariables()
     setCredentials(project.'artifactory_username', project.'artifactory_password')
@@ -27,7 +29,6 @@ class ReadyTalkReposPlugin extends PluginApplicator implements ReposConvention {
     addLocal()
     addMainRepo()
     addSnapshotPublishRepo()
-    addReleasePublishRepo()
   }
 
   void addLocal() {
@@ -40,8 +41,8 @@ class ReadyTalkReposPlugin extends PluginApplicator implements ReposConvention {
     password = pass
 
     credentials = {
-      username user
-      password pass
+      setUsername user
+      setPassword pass
     }
   }
 
@@ -62,8 +63,6 @@ class ReadyTalkReposPlugin extends PluginApplicator implements ReposConvention {
     assert project.has('artifactory_username')
     assert project.has('artifactory_password')
   }
-
-
 
   void addMainRepo() {
 

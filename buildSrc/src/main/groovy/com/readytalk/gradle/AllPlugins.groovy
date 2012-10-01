@@ -1,22 +1,17 @@
 package com.readytalk.gradle
 
-import com.readytalk.gradle.util.PluginApplicator
+import org.gradle.api.Project
+import org.gradle.api.Plugin
+import com.readytalk.gradle.repos.ReadyTalkReposPlugin
+import com.readytalk.gradle.repos.OpenSourceReposPlugin
+import com.readytalk.gradle.publishers.ReadyTalkPublisherPlugin
+import com.readytalk.gradle.publishers.OpenSourcePublisherPlugin
 
-class ReadyTalkAllPlugins extends PluginApplicator {
+class AllPlugins implements Plugin<Project> {
   Project project
 
-  def internalFactory = [
-                          repos: ReadyTalkReposPlugin,
-                          publishers: ArtifactoryPublisherPlugin
-                        ]
-
-  def publicFactory =   [
-                          repos: OpenSourceReposPlugin,
-                          publishers: OpenSourcePublisherPlugin
-                        ]
-
   void apply(Project project) {
-    super.apply(project)
+    this.project = project
 
     //extensions.create("readytalk", ReadyTalkClosure, project)
 
@@ -36,15 +31,22 @@ class ReadyTalkAllPlugins extends PluginApplicator {
 
   void initPlugins() {
     if(project.has('readytalk_repo') &&
-       project.'readytalk_repo') {
+      project.'readytalk_repo') {
 
-      PluginFactory.factory = internalFactory
+      project.apply {
+        plugin ReadyTalkReposPlugin
+        plugin ReadyTalkPublisherPlugin
+      }
 
     } else {
-
-      PluginFactory.factory = publicFactory
-
+      project.apply {
+        plugin OpenSourceReposPlugin
+        plugin OpenSourcePublisherPlugin
+      }
     }
+
+
+
   }
 
 }

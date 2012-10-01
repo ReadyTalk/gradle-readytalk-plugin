@@ -1,6 +1,9 @@
 package com.readytalk.gradle.repos
 
-interface ReposConvention {
+import org.gradle.api.Project
+import org.gradle.api.Plugin
+
+interface ReposConvention extends Plugin<Project> {
   
   void addLocal()
 

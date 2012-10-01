@@ -1,5 +1,7 @@
 package com.readytalk.gradle.dsl
 
+import org.gradle.api.Project
+
 class ReadyTalkClosure {
   
   private final Project project
