@@ -1,5 +1,5 @@
 apply from: 'buildSrc/build.gradle'
-apply plugin: 'readytalk-all'
+apply plugin: 'readytalk'
 
 sourceSets {
   main {
