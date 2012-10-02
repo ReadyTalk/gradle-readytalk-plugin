@@ -10,17 +10,42 @@ class LocalPublisherPlugin implements Plugin<Project> {
 
   Project project
 
+  private static String name = 'local'
+  private String url, userHome
+
   void apply(Project project) {
     this.project = project
 
-    addInstallTask(InstallTask.class)
+    userHome = System.getProperty('user.home')
+    url = "${userHome}/.ivy2/local"
+
+    addRepo()
+    addTask()
   }
 
-  void addInstallTask(Class<Task> task) {
-    InstallTask install = project.tasks.add('install', task)
-    install.setDescription 'Install project into the local Ivy repository'
-    install.setGroup 'publish'
-    install.dependsOn 'build'
+  void addTask() {
+    project.tasks.add(name: 'install', type: InstallTask) { 
+      description "Install project into the local Ivy repository (${url})"
+      group 'publish'
+      dependsOn 'build'
+    }
+  }
+
+  String addRepo() {
+
+    project.repositories {
+      ivy {
+        name getName()
+        url this.url
+        layout "maven"
+      }
+    }
+
+    return getName()
+  }
+
+  static String getName() {
+    return name
   }
 
 }
