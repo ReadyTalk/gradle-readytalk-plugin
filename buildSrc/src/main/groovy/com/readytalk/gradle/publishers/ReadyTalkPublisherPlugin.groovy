@@ -1,31 +1,167 @@
 package com.readytalk.gradle.publishers
 
-import com.readytalk.gradle.tasks.InstallTask
+import com.readytalk.gradle.tasks.PublishTask
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
 
 import org.gradle.api.DefaultTask
 
-class ReadyTalkPublisherPlugin extends LocalPublisherPlugin implements PublisherConvention {
+class ReadyTalkPublisherPlugin implements Plugin<Project> {
+
+  private Project project
+  private static String ivyMainResolverName = 'readytalk_ivy_main'
+  private static String mavenMainResolverName = 'readytalk_maven_main'
+  private static String snapshotPublishRepoName = 'readytalk_ivy_snapshots'
+  private static String ivyLayout = '[organization]/[module]/[revision]/ivy-[revision](-[classifier]).xml'
+  private static String ivyArtifactLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]'
+  private String artifactoryRoot, artifactoryMain
+  private String username, password
+  private Closure credentials
+  private String repoType
 
   void apply(Project project) {
-    super.apply(project)
+    this.project = project
 
-    project.apply {
-      plugin 'artifactory'
+    if(setupProperties()) {
+
+      addResolverRepo()
+
+      project.apply {
+        plugin 'artifactory'
+      }
+
+      addSnapshotPublishRepo()
+      addTask()
+
+    } else {
+      project.logger.warn('Artifactory repositories and publish tasks not added! Set up your credentials!')
     }
-
-    addPublishTask(DefaultTask.class)
   }
 
-  void addPublishTask(Class<Task> task) {
+  void addTask() {
     // The artifactoryPublish looks for itself in the task graph,
     // so we have to define it like this
-    DefaultTask publish = project.tasks.add('publish', task)
-    publish.setDescription 'Install project into corporate Artifactory'
-    publish.setGroup 'publish'
-    publish.dependsOn 'artifactoryPublish'
+    project.tasks.add(name: 'publish', type: DefaultTask) {
+      description 'Install project into corporate Artifactory'
+      group 'publish'
+      dependsOn 'artifactoryPublish'
+    }
+    
+  }
+
+  void setCredentials(String user, String pass) {
+    username = user
+    password = pass
+
+    credentials = {
+      setUsername user
+      setPassword pass
+    }
+  }
+
+  void setRepoType(String type) {
+    if(type == 'plugin') {
+      repoType = 'plugins'
+    } else if (type == 'external') {
+      repoType = 'ext'
+    } else {
+      repos = 'libs'
+    }
+  }
+
+  void setArtifactoryRoot(String root) {
+    artifactoryRoot = root
+  }
+
+  void setArtifactoryMain(String main) {
+    artifactoryMain = main
+  }
+
+  void setUsername(String user) {
+    username = user
+  }
+
+  void setPassword(String pass) {
+    password = pass
+  }
+
+  boolean setupProperties() {
+    if(project.has('type') &&
+       project.has('artifactory_root') &&
+       project.has('artifactory_main') &&
+       project.has('artifactory_username') &&
+       project.has('artifactory_password')) {
+
+      setCredentials(project.'artifactory_username',
+                     project.'artifactory_password')
+      setRepoType(project.'type')
+      setArtifactoryRoot(project.'artifactory_root')
+      setArtifactoryMain(project.'artifactory_main')
+
+      return true
+    }
+    return false
+  }
+
+  void checkRequiredVariables() {
+
+  }
+
+  void addResolverRepo() {
+
+    def ecovate_repo = {
+      url project.'artifactory_main'
+      credentials credentials
+    }
+
+    project.repositories {
+      ivy(ecovate_repo).name = ivyMainResolverName
+      maven(ecovate_repo).name = mavenMainResolverName
+    }
+  }
+
+  void addSnapshotPublishRepo() {
+
+    project.artifactory {
+      contextUrl = project.'artifactory_root'
+
+      publish {
+        repository {
+          repoKey = "${repoType}-snapshots-local"
+          
+          username = username
+          password = password
+
+          ivy {
+            ivyLayout = ivyLayout
+            artifactLayout = ivyArtifactLayout
+            mavenCompatible = true
+          }
+        }
+
+        defaults {
+          publishIvy = true
+          publishPom = false
+        }
+      }
+
+      resolve {
+        repository {
+          repoKey = 'repo'
+          username = username
+          password = password
+
+          ivy {
+            ivyLayout = ivyLayout
+            artifactLayout = ivyArtifactLayout
+            mavenCompatible = true
+          }
+        }
+      }
+
+    }
+
   }
 
 }
