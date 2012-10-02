@@ -2,18 +2,15 @@ package com.readytalk.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.Plugin
-import com.readytalk.gradle.repos.ReadyTalkReposPlugin
-import com.readytalk.gradle.repos.OpenSourceReposPlugin
 import com.readytalk.gradle.publishers.ReadyTalkPublisherPlugin
 import com.readytalk.gradle.publishers.OpenSourcePublisherPlugin
+import com.readytalk.gradle.publishers.LocalPublisherPlugin
 
 class AllPlugins implements Plugin<Project> {
   Project project
 
   void apply(Project project) {
     this.project = project
-
-    //extensions.create("readytalk", ReadyTalkClosure, project)
 
     initPropertiesPlugin()
     initPlugins()
@@ -30,17 +27,21 @@ class AllPlugins implements Plugin<Project> {
   }
 
   void initPlugins() {
+    project.apply {
+      plugin LocalPublisherPlugin
+    }
+
     if(project.has('readytalk_repo') &&
       project.'readytalk_repo') {
 
       project.apply {
-        plugin ReadyTalkReposPlugin
         plugin ReadyTalkPublisherPlugin
       }
 
+
+
     } else {
       project.apply {
-        plugin OpenSourceReposPlugin
         plugin OpenSourcePublisherPlugin
       }
     }
