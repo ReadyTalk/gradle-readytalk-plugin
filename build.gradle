@@ -1,5 +1,12 @@
 apply from: 'buildSrc/build.gradle'
-apply plugin: 'readytalk'
+apply plugin: 'release'
+apply plugin: 'open-sonatype'
+apply plugin: 'groovy-extras'
+
+group='com.readytalk'
+version='0.1.0-SNAPSHOT'
+
+defaultTasks 'install'
 
 sourceSets {
   main {
