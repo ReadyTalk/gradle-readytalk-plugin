@@ -1,13 +1,14 @@
-package com.readytalk.gradle.publishers
+package com.readytalk.gradle.plugins
 
-import com.readytalk.gradle.tasks.PublishTask
+import com.readytalk.gradle.tasks.Publish
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
+import org.gradle.api.InvalidUserDataException
 
 import org.gradle.api.DefaultTask
 
-class ReadyTalkPublisherPlugin implements Plugin<Project> {
+class ArtifactoryPublisher implements Plugin<Project> {
 
   private Project project
   private static String ivyMainResolverName = 'readytalk_ivy_main'
@@ -16,12 +17,11 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
   private static String ivyLayout = '[organization]/[module]/[revision]/ivy-[revision](-[classifier]).xml'
   private static String ivyArtifactLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]'
   private String artifactoryRoot, artifactoryMain
-  private String username, password
   private Closure credentials
   private String repoType
 
-  void apply(Project project) {
-    this.project = project
+  void apply(Project target) {
+    this.project = target
 
     if(setupProperties()) {
 
@@ -35,7 +35,7 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
       addTask()
 
     } else {
-      project.logger.warn('Artifactory repositories and publish tasks not added! Set up your credentials!')
+      throw new InvalidUserDataException('HALT! Set up your credentials!')
     }
   }
 
@@ -51,9 +51,6 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
   }
 
   void setCredentials(String user, String pass) {
-    username = user
-    password = pass
-
     credentials = {
       setUsername user
       setPassword pass
@@ -78,14 +75,6 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
     artifactoryMain = main
   }
 
-  void setUsername(String user) {
-    username = user
-  }
-
-  void setPassword(String pass) {
-    password = pass
-  }
-
   boolean setupProperties() {
     if(project.has('type') &&
        project.has('artifactory_root') &&
@@ -102,10 +91,6 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
       return true
     }
     return false
-  }
-
-  void checkRequiredVariables() {
-
   }
 
   void addResolverRepo() {
@@ -130,8 +115,8 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
         repository {
           repoKey = "${repoType}-snapshots-local"
           
-          username = username
-          password = password
+          username = credentials.username
+          password = credentials.password
 
           ivy {
             ivyLayout = ivyLayout
@@ -149,8 +134,8 @@ class ReadyTalkPublisherPlugin implements Plugin<Project> {
       resolve {
         repository {
           repoKey = 'repo'
-          username = username
-          password = password
+          username = credentials.username
+          password = credentials.password
 
           ivy {
             ivyLayout = ivyLayout
