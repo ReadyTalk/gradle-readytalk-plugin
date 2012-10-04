@@ -1,5 +1,13 @@
 apply from: 'buildSrc/build.gradle'
-apply plugin: 'readytalk'
+apply plugin: 'release'
+apply plugin: 'open-sonatype'
+apply plugin: 'java-extras'
+apply plugin: 'groovy-extras'
+
+group='com.readytalk'
+version='0.1.0'
+
+defaultTasks 'install'
 
 sourceSets {
   main {
@@ -8,6 +16,31 @@ sourceSets {
     }
     resources {
       srcDir file("buildSrc/src/main/resources")
+    }
+  }
+}
+
+uploadArchives.repositories.getByName('Sonatype OSS') {
+  pom.project {
+    url 'http://github.com/ReadyTalk/gradle-readytalk-plugin'
+
+    licenses {
+      license {
+        name 'The Apache Software License, Version 2.0'
+        url 'http://www.apache.org/licenses/LICENSE-2.0'
+      }
+    }
+    developers {
+      developer {
+        id 'sgoings'
+        name 'Seth Goings'
+        email 'seth.goings@readytalk.com'
+      }
+    }
+    scm {
+      connection 'git://github.com/ReadyTalk/gradle-readytalk-plugin.git'
+      developerConnection 'git@github.com:ReadyTalk/gradle-readytalk-plugin.git'
+      url 'http://github.com/ReadyTalk/gradle-readytalk-plugin'
     }
   }
 }

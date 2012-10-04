@@ -6,17 +6,28 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 
-import com.readytalk.gradle.publishers.OpenSourcePublisherPlugin
+import org.gradle.api.artifacts.repositories.ArtifactRepository
 
-class PublishTask extends DefaultTask {
+class Publish extends DefaultTask {
+
+  ArtifactRepository repo
 
   @TaskAction
   void run() {
 
     project.uploadArchives.repositories {
-      add project.repositories.getByName(OpenSourcePublisherPlugin.getSnapshotRepoName())
+      add repo
     }
 
     project.uploadArchives.execute()
   }
+
+  void setRepo(ArtifactRepository repo) {
+  	this.repo = repo
+  }
+
+  ArtifactRepository getRepo() {
+  	return repo
+  }
+
 }
