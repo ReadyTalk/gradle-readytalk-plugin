@@ -1,10 +1,39 @@
 apply from: 'buildSrc/build.gradle'
 
 apply plugin: 'groovy'
-apply plugin: 'readytalk'
+apply plugin: 'processor'
 
 group='com.readytalk'
 version='0.1.0'
+
+/*
+
+  IDEAL CASE
+
+  processor {
+  
+    project {
+      // external defaults to publishing style = maven, repository = opensonatype
+      // internal defaults to publishing style = ivy, repository = internalartifactory
+      type 'external'|'internal'
+    }
+
+    publishing {
+      // determines which type of publishing we do (ivy or maven)
+      style 'maven'|'ivy'
+      // determines where we install, publish, and release
+      repository 'opensonatype'|'internalartifactory'
+
+      /defaults retrieved depending on project type, but resolved via gradle properties
+      credentials {
+        username 'sgoings'
+        password 'secret'
+      }
+    }
+
+  }
+
+*/
 
 readytalk {
 

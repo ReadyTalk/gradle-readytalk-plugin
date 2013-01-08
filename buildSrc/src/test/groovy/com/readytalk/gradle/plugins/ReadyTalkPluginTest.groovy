@@ -12,7 +12,7 @@ class ReadyTalkPluginTest extends Specification {
   
   Project setupProject() {
     Project project = ProjectBuilder.builder().build()
-    project.apply(plugin: 'readytalk')
+    project.apply(plugin: 'processor')
     return project
   }
 
