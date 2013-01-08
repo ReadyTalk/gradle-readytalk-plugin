@@ -1,15 +1,25 @@
-apply plugin: 'groovy'
+  apply plugin: 'groovy'
 
-repositories {
-  mavenCentral()
-  maven { 
-    url 'http://repo.jfrog.org/artifactory/gradle-plugins'
+  repositories {
+    mavenCentral()
+    maven { 
+      url 'http://repo.jfrog.org/artifactory/gradle-plugins'
+    }
   }
-}
 
-dependencies {
-  compile group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '2.0.16'
-  compile group: 'net.saliman', name: 'gradle-properties-plugin', version: '1.1.0'
-  compile gradleApi()
-  groovy localGroovy()
-}
+  dependencies {
+    compile group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '2.0.16'
+    compile group: 'net.saliman', name: 'gradle-properties-plugin', version: '1.1.0'
+    compile "commons-logging:commons-logging:1.1.1"
+    compile gradleApi()
+
+    groovy "org.codehaus.groovy:groovy-all:1.8.6"
+
+    testCompile "org.spockframework:spock-core:0.6-groovy-1.8"
+  }
+
+  test.testLogging {
+      exceptionFormat "full"
+      //lifecycle.events = [TestLogEvent.FAILED]
+      //showStandardStreams = true
+  }

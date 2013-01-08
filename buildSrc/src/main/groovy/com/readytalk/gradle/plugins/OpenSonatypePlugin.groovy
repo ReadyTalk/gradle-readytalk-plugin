@@ -4,7 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.InvalidUserDataException
 
-class OpenSonatypePublisher implements Plugin<Project> {
+class OpenSonatypePlugin implements Plugin<Project> {
 
   private Project project
 
@@ -38,7 +38,9 @@ class OpenSonatypePublisher implements Plugin<Project> {
         authentication(userName: this.username, password: this.password)
       }
 
-      beforeDeployment { project.signing.signPom it }
+      beforeDeployment {
+        project.signing.signPom it
+      }
 
       pom.project {
         name project.name
@@ -47,6 +49,7 @@ class OpenSonatypePublisher implements Plugin<Project> {
     }
 
     addPublishTask()
+    configureInstallTask()
   }
 
   private void addResolverRepo() {
@@ -68,7 +71,15 @@ class OpenSonatypePublisher implements Plugin<Project> {
 
   private void addPublishTask() {
     project.tasks.add(name: 'publish') {
+      description 'Install project into OSS Sonatype repository'
+      group 'publishing'
       dependsOn 'build', 'uploadArchives'
+    }
+  }
+
+  private void configureInstallTask() {
+    project.tasks.install {
+      group 'publishing'
     }
   }
 }

@@ -3,10 +3,11 @@ package com.readytalk.gradle.plugins
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.InvalidUserDataException
 
 import org.gradle.api.DefaultTask
 
-class JavaExtras implements Plugin<Project> {
+class JavaExtrasPlugin implements Plugin<Project> {
 
   static final String GROOVYDOCJAR_TASK_NAME = 'groovydocJar'
   static final String JAVADOCJAR_TASK_NAME = 'javadocJar'
@@ -17,6 +18,8 @@ class JavaExtras implements Plugin<Project> {
   void apply(Project project) {
     this.project = project
 
+    checkForJavaPlugin()
+
     addJavadocJarTask()
     addSourceJarTask()
 
@@ -25,6 +28,12 @@ class JavaExtras implements Plugin<Project> {
     project.artifacts {
       archives project.sourcesJar
       archives project.javadocJar
+    }
+  }
+
+  private void checkForJavaPlugin() {
+    if(!project.plugins.hasPlugin('java')) {
+      throw new InvalidUserDataException("You must apply the 'java' or 'java-base' plugin to use the 'java-extras' plugin.")
     }
   }
 

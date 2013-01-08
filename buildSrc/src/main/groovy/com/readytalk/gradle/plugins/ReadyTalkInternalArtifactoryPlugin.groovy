@@ -1,6 +1,5 @@
 package com.readytalk.gradle.plugins
 
-import com.readytalk.gradle.tasks.Publish
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
@@ -8,7 +7,7 @@ import org.gradle.api.InvalidUserDataException
 
 import org.gradle.api.DefaultTask
 
-class ArtifactoryPublisher implements Plugin<Project> {
+class ReadyTalkInternalArtifactoryPlugin implements Plugin<Project> {
 
   private Project project
   private static String ivyMainResolverName = 'readytalk_ivy_main'
@@ -16,14 +15,20 @@ class ArtifactoryPublisher implements Plugin<Project> {
   private static String snapshotPublishRepoName = 'readytalk_ivy_snapshots'
   private static String ivyLayout = '[organization]/[module]/[revision]/ivy-[revision](-[classifier]).xml'
   private static String ivyArtifactLayout = '[organization]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]'
+  private static final String REPO_NAME = 'local'
   private String artifactoryRoot, artifactoryMain
-  private Closure credentials
+  private String username, password
   private String repoType
 
   void apply(Project target) {
     this.project = target
 
     if(setupProperties()) {
+
+      project.apply(plugin: 'ivy-publish')
+
+      configureIvyPublish()
+      addInstallTask()
 
       addResolverRepo()
 
@@ -42,19 +47,17 @@ class ArtifactoryPublisher implements Plugin<Project> {
   void addTask() {
     // The artifactoryPublish looks for itself in the task graph,
     // so we have to define it like this
-    project.tasks.add(name: 'publish', type: DefaultTask) {
+    project.tasks.add(name: 'publish', overwrite: true) {
       description 'Install project into corporate Artifactory'
-      group 'publish'
+      group 'publishing'
       dependsOn 'artifactoryPublish'
     }
     
   }
 
   void setCredentials(String user, String pass) {
-    credentials = {
-      setUsername user
-      setPassword pass
-    }
+    username = user
+    password = pass
   }
 
   void setRepoType(String type) {
@@ -97,7 +100,10 @@ class ArtifactoryPublisher implements Plugin<Project> {
 
     def ecovate_repo = {
       url project.'artifactory_main'
-      credentials credentials
+      credentials {
+        username = username
+        password = password
+      }
     }
 
     project.repositories {
@@ -115,8 +121,8 @@ class ArtifactoryPublisher implements Plugin<Project> {
         repository {
           repoKey = "${repoType}-snapshots-local"
           
-          username = credentials.username
-          password = credentials.password
+          username = username
+          password = password
 
           ivy {
             ivyLayout = ivyLayout
@@ -134,8 +140,8 @@ class ArtifactoryPublisher implements Plugin<Project> {
       resolve {
         repository {
           repoKey = 'repo'
-          username = credentials.username
-          password = credentials.password
+          username = username
+          password = password
 
           ivy {
             ivyLayout = ivyLayout
@@ -148,5 +154,26 @@ class ArtifactoryPublisher implements Plugin<Project> {
     }
 
   }
+
+  private configureIvyPublish() {
+    project.publishing {
+      repositories {
+        ivy { 
+          name REPO_NAME
+          layout 'maven'
+          url System.getProperty('user.home') + '/.ivy2/local'
+        }
+      }
+    }
+  }
+
+  private void addInstallTask() {
+    project.task('install') {
+      description "Install project into the local Ivy repository"
+      group 'publishing'
+      dependsOn 'publishIvyPublicationToLocalRepository'
+    }
+  }
+
 
 }
